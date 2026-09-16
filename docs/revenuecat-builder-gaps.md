@@ -76,9 +76,10 @@ surfaced Part 2.
 
 ## Environment / method
 
-- Paywall: components paywall "Quarterly + Annual" (`pw9203a483b4e148f6`),
-  which contains a `tabs` component ("free-trial toggle" design: OFF/ON tab
-  stacks each holding a package stack and a purchase button).
+- Paywall: a production two-package components paywall (id withheld) containing
+  a `tabs` component ("free-trial toggle" design: OFF/ON tab stacks each holding a
+  package stack and a purchase button) — the same structure as the library's
+  `gradient-trial-toggle` design.
 - All experiments were run on throwaway duplicates created with
   `POST /v2/projects/{p}/paywalls/{id}/actions/duplicate` (since deleted).
   Writes used the public API v2 `PATCH /paywalls/{id}`
@@ -86,8 +87,8 @@ surfaced Part 2.
   `GET /paywalls/{id}?expand=components`. The builder was cold-reloaded
   between steps.
 - Runtime ground truth: the same `components_config` rendered via
-  RevenueCatUI 5.76.0 (PaywallValidationTester harness) with intro-offer
-  eligibility forced both ways.
+  RevenueCatUI 5.76.0 (this lab's iOS harness) with intro-offer eligibility
+  forced both ways.
 
 ## Findings matrix
 
