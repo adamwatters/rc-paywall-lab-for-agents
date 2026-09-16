@@ -272,8 +272,8 @@ class Strings:
 
 
 def lab_home():
-    return os.environ.get("PAYWALL_LAB_HOME") or os.path.join(
-        os.environ.get("PAYWALL_LAB_ROOT", os.path.dirname(os.path.abspath(__file__))), "my")
+    return os.path.abspath(os.environ.get("PAYWALL_LAB_HOME") or os.path.join(
+        os.environ.get("PAYWALL_LAB_ROOT", os.path.dirname(os.path.abspath(__file__))), "my"))
 
 
 def products():

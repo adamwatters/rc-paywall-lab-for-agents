@@ -44,7 +44,7 @@ import urllib.error
 import urllib.request
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-MY = os.environ.get("PAYWALL_LAB_HOME") or os.path.join(ROOT, "my")
+MY = os.path.abspath(os.environ.get("PAYWALL_LAB_HOME") or os.path.join(ROOT, "my"))
 CONFIG_PATH = os.path.join(MY, "config.json")
 PRODUCTS_PATH = os.path.join(MY, "products.json")
 UI_CONFIG_PATH = os.path.join(MY, "ui_config.json")
