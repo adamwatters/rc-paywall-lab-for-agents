@@ -1,10 +1,24 @@
 //  Loader.swift — rc-paywall-lab iOS harness.
 //
-//  Adapted from RevenueCat's PaywallPreviewResourcesLoader (purchases-ios,
-//  Tests/RevenueCatUITests/PaywallsV2, MIT © RevenueCat Inc.). Reads the SDK
-//  wire-format offerings JSON that `lab.py render` writes, binds packages to mock
-//  StoreKit products described by products.json, and rewrites CDN image hosts to
+//  Reads what `lab.py render` writes into <resources>/: qa/offerings.json (SDK wire
+//  shape: offerings[].paywall_components + ui_config) and products.json, builds mock
+//  SK1 products, and assembles an `Offering` with its paywall components attached —
+//  the same construction the Android harness does. CDN image hosts are rewritten to
 //  the local asset mirror when one exists.
+//
+//  Originally adapted from RevenueCat's PaywallPreviewResourcesLoader (purchases-ios,
+//  Tests/RevenueCatUITests/PaywallsV2, MIT © RevenueCat Inc.).
+//
+//  SDK surface used (see docs/platforms.md for the compat matrix):
+//    public:          Offering(identifier:serverDescription:paywallComponents:availablePackages:webCheckoutUrl:)
+//                     Package(identifier:packageType:storeProduct:offeringIdentifier:webCheckoutUrl:)
+//                     StoreProduct(sk1Product:)
+//    @_spi(Internal): PaywallComponentsData, UIConfig (Decodable), Offering.PaywallComponents(uiConfig:data:)
+//    @testable:       JSONDecoder.default (the SDK's snake_case decoder), Package.packageType(from:)
+//  Why not OfferingsFactory: since purchases-ios 5.81.1 an OfferingsResponse no longer
+//  carries decoded paywall_components (the SDK fetches them separately), so a factory-built
+//  offering renders the fallback paywall. Decoding the components here also makes a
+//  decode failure visible on screen ("Load failed: …") instead of a silent fallback.
 import Foundation
 import StoreKit
 @_spi(Internal) @testable import RevenueCat
@@ -95,16 +109,23 @@ enum PaywallPreviewResourcesError: Error {
     case couldNotReadOfferingsFile
     case failedToConvertJSONToData
     case failedToDecodeOfferings(String)
-    case couldNotParsePackagesData
-    case failedToDecodePackages
+    case noOfferingWithComponents
+    case missingUIConfig
     case couldNotReadProducts
 }
 
-class PaywallPreviewResourcesLoader {
-    struct PackageData: Decodable {
-        let packages: [OfferingsResponse.Offering.Package]
+/// Minimal wire shape of qa/offerings.json (snake_case keys via JSONDecoder.default).
+private struct LabOfferingsFile: Decodable {
+    struct Offering: Decodable {
+        let identifier: String
+        let description: String?
+        let paywallComponents: PaywallComponentsData?
     }
+    let offerings: [Offering]
+    let uiConfig: UIConfig?
+}
 
+class PaywallPreviewResourcesLoader {
     private var baseResourcesURL: URL
     private var offerings: [String: Offering] = [:]
 
@@ -115,17 +136,19 @@ class PaywallPreviewResourcesLoader {
 
     var allOfferings: [Offering] { Array(offerings.values) }
 
-    private func loadProducts() throws -> [String: StoreProduct] {
+    private func loadPackages(offeringIdentifier: String) throws -> [Package] {
         let url = baseResourcesURL.appendingPathComponent("products.json")
         guard let data = try? Data(contentsOf: url),
               let spec = try? JSONDecoder().decode(LabProducts.self, from: data) else {
             throw PaywallPreviewResourcesError.couldNotReadProducts
         }
-        var out: [String: StoreProduct] = [:]
-        for p in spec.packages {
-            out[p.productId] = .init(sk1Product: LabTrialProduct(spec: p))
+        return spec.packages.map { p in
+            Package(identifier: p.identifier,
+                    packageType: Package.packageType(from: p.identifier),
+                    storeProduct: StoreProduct(sk1Product: LabTrialProduct(spec: p)),
+                    offeringIdentifier: offeringIdentifier,
+                    webCheckoutUrl: nil)
         }
-        return out
     }
 
     private func loadOfferings() throws -> [String: Offering] {
@@ -138,13 +161,10 @@ class PaywallPreviewResourcesLoader {
         if resourceDirectories.isEmpty {
             throw PaywallPreviewResourcesError.noValidResourceDirectories
         }
-        let products = try loadProducts()
-        let packagesPath = baseResourcesURL.appendingPathComponent("packages.json")
 
         for resourceURL in resourceDirectories {
-            let resource = resourceURL.lastPathComponent
             let offeringsPath = resourceURL.appendingPathComponent("offerings.json")
-            guard let offeringsRawString = try? String(contentsOf: offeringsPath) else { continue }
+            guard let offeringsRawString = try? String(contentsOf: offeringsPath, encoding: .utf8) else { continue }
 
             // Rewrite CDN hosts only when a local mirror exists; else images load from the network.
             let mirror = resourceURL.appendingPathComponent("pawwalls")
@@ -159,48 +179,34 @@ class PaywallPreviewResourcesLoader {
             guard let modifiedData = modifiedJSON.data(using: .utf8) else {
                 throw PaywallPreviewResourcesError.failedToConvertJSONToData
             }
-            let offeringsResponse: OfferingsResponse
+            let file: LabOfferingsFile
             do {
-                offeringsResponse = try JSONDecoder.default.decode(OfferingsResponse.self, from: modifiedData)
+                file = try JSONDecoder.default.decode(LabOfferingsFile.self, from: modifiedData)
             } catch {
                 print("LAB decode error: \(error)")
                 throw PaywallPreviewResourcesError.failedToDecodeOfferings("\(error)")
             }
-            for off in offeringsResponse.offerings {
-                print("LAB offering \(off.identifier): paywallComponents=\(off.paywallComponents != nil)",
-                      "errors=\(String(describing: off.paywallComponents?.errorInfo))")
+            guard let uiConfig = file.uiConfig else {
+                throw PaywallPreviewResourcesError.missingUIConfig   // lab.py render always writes one
             }
-            guard let packagesData = try? Data(contentsOf: packagesPath) else {
-                throw PaywallPreviewResourcesError.couldNotParsePackagesData
-            }
-            guard let packages = try? JSONDecoder.default.decode(PackageData.self, from: packagesData) else {
-                throw PaywallPreviewResourcesError.failedToDecodePackages
-            }
-            let offeringsWithPackages = offeringsResponse.offerings.map { offering in
-                OfferingsResponse.Offering(
-                    identifier: offering.identifier,
-                    description: offering.description,
-                    packages: packages.packages,
-                    paywallComponents: offering.paywallComponents,
-                    draftPaywallComponents: offering.draftPaywallComponents,
-                    webCheckoutUrl: offering.webCheckoutUrl
+            for off in file.offerings {
+                guard let components = off.paywallComponents else {
+                    print("LAB offering \(off.identifier): no paywall_components, skipped")
+                    continue
+                }
+                let packages = try loadPackages(offeringIdentifier: off.identifier)
+                print("LAB offering \(off.identifier): packages=\(packages.count) revision=\(components.revision)")
+                result[off.identifier] = Offering(
+                    identifier: off.identifier,
+                    serverDescription: off.description ?? "",
+                    paywallComponents: .init(uiConfig: uiConfig, data: components),
+                    availablePackages: packages,
+                    webCheckoutUrl: nil
                 )
             }
-            let response = OfferingsResponse(
-                currentOfferingId: offeringsResponse.currentOfferingId,
-                offerings: offeringsWithPackages,
-                placements: offeringsResponse.placements,
-                targeting: offeringsResponse.targeting,
-                uiConfig: offeringsResponse.uiConfig ?? PreviewMock.uiConfig
-            )
-            let offerings = OfferingsFactory().createOfferings(
-                from: products,
-                contents: Offerings.Contents(response: response, httpResponseOriginalSource: .mainServer),
-                loadedFromDiskCache: false
-            )
-            if let all = offerings?.all {
-                result.merge(all) { _, new in new }
-            }
+        }
+        if result.isEmpty {
+            throw PaywallPreviewResourcesError.noOfferingWithComponents
         }
         return result
     }

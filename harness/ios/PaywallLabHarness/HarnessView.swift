@@ -12,6 +12,8 @@
 //  Internals reached via @testable/@_spi imports: PaywallView(configuration:) with a
 //  forced TrialOrIntroEligibilityChecker and a mock purchase handler. Both imports need
 //  @_spi(Internal) — the eligibility checker is SPI-public.
+//  Version notes (see docs/platforms.md compat matrix): PaywallViewConfiguration dropped
+//  its `customerInfo:` parameter in purchases-ios 5.86.0.
 import SwiftUI
 @_spi(Internal) @testable import RevenueCat
 @_spi(Internal) @testable import RevenueCatUI
@@ -37,7 +39,6 @@ struct HarnessView: View {
         if let offering = offerings.first {
             PaywallView(configuration: .init(
                 offering: offering,
-                customerInfo: TestData.customerInfo,
                 mode: .default,
                 fonts: DefaultPaywallFontProvider(),
                 introEligibility: .producing(eligibility: introEligible ? .eligible : .ineligible),

@@ -457,20 +457,19 @@ def render(name, quiet=False):
         "revision": var.get("revision", 1),
         "automatically_scale_font_size": var.get("automatically_scale_font_size", True),
     }
+    # Packages in SDK wire shape (the iOS loader binds them to mock products by product id).
+    packages = [{"identifier": p["identifier"],
+                 "platform_product_identifier": p.get("ios", {}).get("product_id") or p["identifier"].lstrip("$")}
+                for p in prods["packages"]]
     offerings = {
         "current_offering_id": "qa_lab",
         "offerings": [{"identifier": "qa_lab", "description": f"paywall-lab: {name}",
-                       "packages": [], "paywall_components": paywall_components}],
+                       "packages": packages, "paywall_components": paywall_components}],
         "ui_config": merged_ui_config(name),
     }
     shutil.rmtree(RES_DIR, ignore_errors=True)
     os.makedirs(os.path.join(RES_DIR, "qa"))
     save_json(os.path.join(RES_DIR, "qa", "offerings.json"), offerings)
-    # iOS loader's package → product binding (SDK wire shape)
-    save_json(os.path.join(RES_DIR, "packages.json"), {"packages": [
-        {"identifier": p["identifier"],
-         "platform_product_identifier": p.get("ios", {}).get("product_id") or p["identifier"].lstrip("$")}
-        for p in prods["packages"]]})
     # Both harnesses' product mocks
     out = json.loads(json.dumps(prods))
     for p in out["packages"]:

@@ -8,7 +8,7 @@ plugins {
 
 // The ONE line to keep in sync with the RevenueCat SDK version your app ships
 // (`python3 lab.py detect-sdk <app> --apply` sets it). Artifacts come from Maven Central.
-val revenueCatVersion = "10.8.0"
+val revenueCatVersion = "10.22.0"
 
 android {
     namespace = "dev.paywalllab.harness"

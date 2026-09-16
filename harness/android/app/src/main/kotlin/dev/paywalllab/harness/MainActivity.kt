@@ -151,7 +151,9 @@ object ResourceLoader {
         val off = (0 until offerings.length()).map { offerings.getJSONObject(it) }
             .firstOrNull { it.has("paywall_components") } ?: error("no offering with paywall_components")
         val data = json.decodeFromString<PaywallComponentsData>(off.getJSONObject("paywall_components").toString())
-        val uiConfig = root.optJSONObject("ui_config")?.let { json.decodeFromString<UiConfig>(it.toString()) } ?: UiConfig()
+        // ui_config is required: lab.py render always writes one (UiConfig has no no-arg constructor since 10.22.0).
+        val uiConfig = root.optJSONObject("ui_config")?.let { json.decodeFromString<UiConfig>(it.toString()) }
+            ?: error("no ui_config in offerings.json (run `lab.py render`)")
 
         val products = JSONObject(get(base + "products.json") ?: error("no products.json")).getJSONArray("packages")
         val offeringId = off.getString("identifier")

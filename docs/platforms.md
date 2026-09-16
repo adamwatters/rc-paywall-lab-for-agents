@@ -10,7 +10,14 @@ produce the same screenshots. Neither patches the SDK; each pins the SDK version
   `purchases-ios` at an exact version (`project.pbxproj`, `XCRemoteSwiftPackageReference`).
 - Reaches SDK internals via `@_spi(Internal) @testable import RevenueCat` / `RevenueCatUI`
   (Debug builds with `ENABLE_TESTABILITY`): `PaywallView(configuration:)` with a forced
-  `TrialOrIntroEligibilityChecker`, a mock purchase handler, `TestData.customerInfo`.
+  `TrialOrIntroEligibilityChecker` and a mock purchase handler (`HarnessView.swift`).
+- The loader (`Loader.swift`) builds the `Offering` itself from `qa/offerings.json` +
+  `products.json`: `PaywallComponentsData` / `UIConfig` decoded with the SDK's own
+  `JSONDecoder.default`, `Offering.PaywallComponents(uiConfig:data:)`, public `Offering` /
+  `Package` initializers. Nothing goes through `OfferingsFactory` — since purchases-ios
+  5.81.1 an offerings response no longer carries decoded components (the SDK fetches them
+  separately), so a factory-built offering renders the fallback paywall.
+- A components decode failure shows on screen as `Load failed: …` (not the fallback).
 - Products are mocked as SK1 products from `products.json` (price, period, free trial).
 - Reads the resources dir straight from the host filesystem (simulator processes can).
 - **First build resolves the package from GitHub: a full clone of purchases-ios,
@@ -47,12 +54,24 @@ Verified = a real design rendered in both eligibility states on this harness.
 
 | harness | SDK version | verified | notes |
 |---|---|---|---|
-| ios | purchases-ios 5.76.0 | 2026-09-16 | |
-| android | purchases-android 10.8.0 | 2026-09-16 | |
+| ios | purchases-ios 5.89.0 | 2026-09-16 | current pin; loader rewritten for the 5.81.1 components change |
+| ios | purchases-ios 5.76.0 | 2026-09-16 | with the harness at commit `69ddfaa` (pre-5.81.1 loader) |
+| android | purchases-android 10.22.0 | 2026-09-16 | current pin; `ui_config` required |
+| android | purchases-android 10.8.0 | 2026-09-16 | with the harness at commit `69ddfaa` |
 
 Bumping: run `detect-sdk --apply` (or edit the one line), then `preview --build`. If a
 build breaks (renamed internal, changed initializer), fix the harness and send a
-prompt with the version and the error so the matrix grows.
+prompt with the version and the error so the matrix grows. The harness code tracks the
+newest verified version; for an older pin check out the commit that verified it.
+
+### Known SDK changes that touched the harnesses
+
+| version | change | harness effect |
+|---|---|---|
+| purchases-ios 5.78.0 | `OfferingsFactory()` → `OfferingsFactory(systemInfo:)` | none since the loader stopped using the factory |
+| purchases-ios 5.81.1 | `OfferingsResponse.Offering` keeps only `has_paywall_components`; components are fetched separately | loader rewritten to decode `PaywallComponentsData` itself and build the `Offering` (the old path silently rendered the fallback paywall) |
+| purchases-ios 5.86.0 | `PaywallViewConfiguration` lost `customerInfo:` | argument removed |
+| purchases-android 10.22.0 | `UiConfig()` no-arg constructor removed | `ui_config` is required in `offerings.json` (`lab.py render` always writes it) |
 
 ## Cross-platform data rules (both harnesses, same JSON)
 
