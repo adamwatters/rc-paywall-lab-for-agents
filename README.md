@@ -52,6 +52,7 @@ Requirements: Python 3.9+ (no packages), Xcode + an iOS simulator for iOS, a JDK
 | `harness/android` | Gradle app + Maven `purchases-ui` (version = one line); public opt-in APIs only |
 | `library/` | designs (complete, parameterized, screenshotted) + recipes (the hard-won building blocks) |
 | `docs/` | the components JSON field guide, the dashboard-builder gaps report, platform notes, workflow & policy |
+| `tests/` | `python3 -m unittest` — DSL→lint contract, every lint rule, `render` output, `init`/`detect-sdk` from fixtures; no simulator needed (runs in CI) |
 | `my/` | **your** project: config, products, variations, snapshots (a fork keeps these; upstream never touches them) |
 
 ## Why this exists

@@ -88,3 +88,5 @@ You will hit things this lab doesn't handle. Fix them locally in your fork, then
 `python3 lab.py suggest --intent "…" --changes "…" --why "…" --open` — a prompt, not
 a PR. Upstream generalizes it. Good candidates: a new lint rule, a recipe, a design,
 an SDK-version fix, a `doctor` check that would have saved you time.
+After touching `lab.py`, `paywall_dsl.py`, `lab_lint.py` or a library design, run
+`python3 -m unittest` (seconds, no simulator) — then the four screenshots.

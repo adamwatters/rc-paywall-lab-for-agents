@@ -28,4 +28,7 @@ Good prompts:
 Designs recreated from public paywalls are welcome as inspiration with an
 "inspired by" attribution; never logos, photography, or verbatim copy.
 
+Upstream verifies every change with `python3 -m unittest` (CI) and the four
+screenshots of the two library designs on both platforms (manual).
+
 License: MIT. By submitting a prompt you agree the resulting change is MIT.
