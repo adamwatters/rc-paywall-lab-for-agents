@@ -1,0 +1,14 @@
+{
+  "_comment": "Copy to config.json (or run `python3 lab.py init --project proj...`, which fills the paywall registry from the API). Secrets never go here: the API key is read from $RC_API_V2_KEY or my/.env.",
+  "project_id": "proj_REPLACE_ME",
+  "api_base": "https://api.revenuecat.com/v2",
+  "api_key_env_var": "RC_API_V2_KEY",
+  "upstream_repo": "adamwatters/rc-paywall-lab-for-agents",
+  "paywalls": {
+    "main": {"id": "pw_REPLACE_ME", "label": "Main paywall (current offering)", "offering_id": null}
+  },
+  "default_paywall": "main",
+  "platforms": ["ios", "android"],
+  "ios": {"device_name": "iPhone 17 Pro", "settle_seconds": 7},
+  "android": {"avd": null, "port": 8765, "settle_seconds": 9, "headless": true, "java_home": null, "sdk_dir": null}
+}

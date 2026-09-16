@@ -1,0 +1,25 @@
+{
+  "_comment": "Font/color aliases for LOCAL previews. Each alias needs an `ios` and an `android` face (each platform's decoder requires its own). PRODUCTION PARITY: aliases must also be registered in your RevenueCat project (dashboard font settings / fonts API) or real users get the system font. The localizations block feeds {{ product.periodly }}-style variables — keep it.",
+  "app": {
+    "colors": {},
+    "fonts": {
+      "serif": {"ios": {"type": "name", "value": "Georgia"}, "android": {"type": "name", "value": "serif"}}
+    }
+  },
+  "localizations": {
+    "en_US": {
+      "day": "day", "daily": "daily", "day_short": "day",
+      "week": "week", "weekly": "weekly", "week_short": "wk",
+      "month": "month", "monthly": "monthly", "month_short": "mo",
+      "year": "year", "yearly": "yearly", "year_short": "yr",
+      "annual": "annual", "annually": "annually", "annual_short": "yr",
+      "free_price": "free", "percent": "%d%%",
+      "num_day_zero": "%d day", "num_day_one": "%d day", "num_day_two": "%d days", "num_day_few": "%d days", "num_day_many": "%d days", "num_day_other": "%d days",
+      "num_week_zero": "%d week", "num_week_one": "%d week", "num_week_two": "%d weeks", "num_week_few": "%d weeks", "num_week_many": "%d weeks", "num_week_other": "%d weeks",
+      "num_month_zero": "%d month", "num_month_one": "%d month", "num_month_two": "%d months", "num_month_few": "%d months", "num_month_many": "%d months", "num_month_other": "%d months",
+      "num_year_zero": "%d year", "num_year_one": "%d year", "num_year_two": "%d years", "num_year_few": "%d years", "num_year_many": "%d years", "num_year_other": "%d years"
+    }
+  },
+  "variable_config": {"variable_compatibility_map": {}, "function_compatibility_map": {}},
+  "custom_variables": {}
+}

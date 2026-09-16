@@ -1,0 +1,23 @@
+{
+  "_comment": "One entry per package in the offering your paywall serves. RevenueCat's API doesn't expose store prices, so fill price/period/trial by hand — the harnesses mock the products from this file. trial = null for products without a free trial. android.product_id / base_plan_id are only labels for the mock; nothing is purchased.",
+  "packages": [
+    {
+      "identifier": "$rc_annual",
+      "name": "Annual",
+      "price": {"amount": 59.99, "currency": "USD"},
+      "period": {"unit": "year", "count": 1},
+      "trial": {"unit": "day", "count": 7},
+      "ios": {"product_id": "com.example.app.annual"},
+      "android": {"product_id": "annual", "base_plan_id": "annual-p1y"}
+    },
+    {
+      "identifier": "$rc_monthly",
+      "name": "Monthly",
+      "price": {"amount": 9.99, "currency": "USD"},
+      "period": {"unit": "month", "count": 1},
+      "trial": {"unit": "day", "count": 7},
+      "ios": {"product_id": "com.example.app.monthly"},
+      "android": {"product_id": "monthly", "base_plan_id": "monthly-p1m"}
+    }
+  ]
+}

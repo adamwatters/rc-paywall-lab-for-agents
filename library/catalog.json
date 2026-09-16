@@ -1,0 +1,103 @@
+{
+  "designs": [
+    {
+      "name": "gradient-trial-toggle",
+      "tags": [
+        "trial-forward",
+        "toggle",
+        "two-tier",
+        "gradient",
+        "social-proof",
+        "eligibility-aware"
+      ],
+      "summary": "mesh gradient, photo strip + quote, free-trial switch over plan cards",
+      "assets": true,
+      "recipes": [
+        "eligibility-siblings",
+        "trial-toggle",
+        "badge-overlay",
+        "responsive-column",
+        "local-assets"
+      ]
+    },
+    {
+      "name": "minimal-two-tier",
+      "tags": [
+        "minimal",
+        "no-image",
+        "starter",
+        "eligibility-aware"
+      ],
+      "summary": "white, headline + 3 benefits + cards + CTA",
+      "assets": false,
+      "recipes": [
+        "eligibility-siblings",
+        "copy-variables"
+      ]
+    }
+  ],
+  "recipes": [
+    {
+      "name": "eligibility-siblings",
+      "dsl": "eligibility_siblings",
+      "tags": [
+        "eligibility",
+        "trial",
+        "builder-legible"
+      ]
+    },
+    {
+      "name": "trial-toggle",
+      "dsl": "trial_toggle",
+      "tags": [
+        "toggle",
+        "tabs",
+        "trial"
+      ]
+    },
+    {
+      "name": "badge-overlay",
+      "dsl": "badge_overlay",
+      "tags": [
+        "badge",
+        "card"
+      ]
+    },
+    {
+      "name": "responsive-column",
+      "dsl": "spacer",
+      "tags": [
+        "layout",
+        "small-screen",
+        "dashboard-parity"
+      ]
+    },
+    {
+      "name": "local-assets",
+      "dsl": "image, image_background, write_png, mesh_gradient",
+      "tags": [
+        "images",
+        "assets",
+        "upload"
+      ]
+    },
+    {
+      "name": "copy-variables",
+      "dsl": "V_PRICE, V_PRICE_PER_MONTH, \u2026",
+      "tags": [
+        "copy",
+        "variables",
+        "pricing"
+      ]
+    },
+    {
+      "name": "localization-ids",
+      "dsl": "lid, Strings",
+      "tags": [
+        "copy",
+        "lids",
+        "api-rules"
+      ]
+    }
+  ]
+}
