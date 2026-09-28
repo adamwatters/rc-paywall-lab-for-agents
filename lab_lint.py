@@ -124,7 +124,7 @@ def lint(var, ui_config, products, assets_dir=None):
                 out.append(Finding("warning", "nested-visibility-rule",
                                    "show/hide rule on a component nested inside a tabs state: the SDK honors it, "
                                    "but the dashboard builder's rules UI cannot list, preview, or edit it. "
-                                   "See library/recipes/eligibility-siblings.md for the builder-legible construction", path))
+                                   "See docs/PAYWALL_JSON.md (eligibility siblings) for the builder-legible construction", path))
         fn = comp.get("font_name")
         if fn:
             entry = (ui_config.get("app", {}).get("fonts") or {}).get(fn)
@@ -141,5 +141,5 @@ def lint(var, ui_config, products, assets_dir=None):
         out.append(Finding("warning", "trial-copy-unconditional",
                            "copy mentions a trial but no intro-offer rule exists: users who already used their "
                            "trial (or store accounts that aren't eligible) will be promised a trial they won't get. "
-                           "See library/recipes/eligibility-siblings.md"))
+                           "See docs/PAYWALL_JSON.md (eligibility siblings)"))
     return out

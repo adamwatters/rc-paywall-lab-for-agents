@@ -1,6 +1,6 @@
 # RevenueCat dashboard builder gaps (why this lab exists)
 
-> Verbatim findings report, lightly anonymized. TL;DR: (1) the rule editor can't target anything inside a `tabs` component; (2) the rules list and preview only reverse-parse a subset of the overrides the SDK honors, so API-written rules can be live yet invisible. Consequence: the lab's dual-state simulator screenshots are the review surface, and the `eligibility-siblings` recipe is the builder-legible construction.
+> Verbatim findings report, lightly anonymized. TL;DR: (1) the rule editor can't target anything inside a `tabs` component; (2) the rules list and preview only reverse-parse a subset of the overrides the SDK honors, so API-written rules can be live yet invisible. Consequence: the lab's dual-state simulator screenshots are the review surface, and eligibility siblings (docs/PAYWALL_JSON.md) are the builder-legible construction.
 
 ---
 
@@ -78,8 +78,8 @@ surfaced Part 2.
 
 - Paywall: a production two-package components paywall (id withheld) containing
   a `tabs` component ("free-trial toggle" design: OFF/ON tab stacks each holding a
-  package stack and a purchase button) — the same structure as the library's
-  `gradient-trial-toggle` design.
+  package stack and a purchase button) — the structure `paywall_dsl.trial_toggle`
+  emits.
 - All experiments were run on throwaway duplicates created with
   `POST /v2/projects/{p}/paywalls/{id}/actions/duplicate` (since deleted).
   Writes used the public API v2 `PATCH /paywalls/{id}`

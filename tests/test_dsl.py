@@ -1,5 +1,5 @@
-"""paywall_dsl emits shapes lint accepts; every library design generates clean and
-deterministically; the library index/catalog list every design."""
+"""paywall_dsl emits shapes lint accepts; a generator using every higher-level
+builder produces lint-clean, deterministic JSON."""
 import json
 import os
 import re
@@ -8,7 +8,6 @@ import tempfile
 import unittest
 
 from tests import helpers
-from tests.helpers import ROOT
 
 import lab_lint
 import paywall_dsl as dsl
@@ -60,55 +59,31 @@ class DslPrimitives(unittest.TestCase):
             self.assertEqual(struct.unpack(">II", helpers.read_text(g, "rb")[16:24]), (4, 4))
 
 
-class LibraryDesigns(unittest.TestCase):
-    """The two library designs are the regression suite; without a simulator this is
-    the half of it that can run anywhere."""
+class Generator(unittest.TestCase):
+    """Without a simulator this is the half of verification that can run anywhere."""
 
-    def test_every_design_generates_lint_clean(self):
-        prods = helpers.products()
+    def test_generates_lint_clean(self):
         with tempfile.TemporaryDirectory() as tmp:
             home = helpers.make_home(tmp)
-            for slug in helpers.list_designs():
-                with self.subTest(design=slug):
-                    var_dir, var = helpers.generate_design(slug, home)
-                    findings = lab_lint.lint(var, helpers.ui_config(), prods,
-                                             assets_dir=os.path.join(var_dir, "assets"))
-                    self.assertEqual([], [f"{f.level} {f.rule}: {f.message}" for f in findings])
-                    self.assertEqual(var["default_locale"], "en_US")
-                    self.assertEqual(var["components_config"]["base"]["stack"]["type"], "stack")
+            var_dir, var = helpers.generate_fixture(home)
+            findings = lab_lint.lint(var, helpers.ui_config(), helpers.products(),
+                                     assets_dir=os.path.join(var_dir, "assets"))
+            self.assertEqual([], [f"{f.level} {f.rule}: {f.message}" for f in findings])
+            self.assertEqual(var["default_locale"], "en_US")
+            self.assertEqual(var["components_config"]["base"]["stack"]["type"], "stack")
 
     def test_generation_is_deterministic(self):
         with tempfile.TemporaryDirectory() as tmp:
             home = helpers.make_home(tmp)
-            for slug in helpers.list_designs():
-                with self.subTest(design=slug):
-                    var_dir, first = helpers.generate_design(slug, home)
-                    _, second = helpers.generate_design(slug, home)
-                    self.assertEqual(first, second)
+            _, first = helpers.generate_fixture(home)
+            _, second = helpers.generate_fixture(home)
+            self.assertEqual(first, second)
 
-    def test_designs_use_every_package(self):
-        prods = helpers.products()
+    def test_uses_every_package(self):
         with tempfile.TemporaryDirectory() as tmp:
-            home = helpers.make_home(tmp)
-            for slug in helpers.list_designs():
-                with self.subTest(design=slug):
-                    _, var = helpers.generate_design(slug, home)
-                    used = set(re.findall(r'"package_id": "([^"]+)"', json.dumps(var)))
-                    self.assertEqual(used, {p["identifier"] for p in prods["packages"]})
-
-    def test_library_index_and_catalog_list_every_design(self):
-        designs = helpers.list_designs()
-        catalog = helpers.read_json(os.path.join(ROOT, "library", "catalog.json"))
-        self.assertEqual(sorted(d["name"] for d in catalog["designs"]), designs)
-        index = helpers.read_text(os.path.join(ROOT, "library", "INDEX.md"))
-        for slug in designs:
-            self.assertIn(f"[{slug}](designs/{slug}/)", index)
-            d = os.path.join(helpers.DESIGNS, slug)
-            self.assertTrue(os.path.isfile(os.path.join(d, "README.md")), f"{slug}/README.md")
-            for shot in ("ios-eligible", "ios-trial-used", "android-eligible", "android-trial-used"):
-                self.assertTrue(os.path.isfile(os.path.join(d, "screenshots", shot + ".png")), f"{slug}: {shot}")
-        for r in catalog["recipes"]:
-            self.assertTrue(os.path.isfile(os.path.join(ROOT, "library", "recipes", r["name"] + ".md")), r["name"])
+            _, var = helpers.generate_fixture(helpers.make_home(tmp))
+            used = set(re.findall(r'"package_id": "([^"]+)"', json.dumps(var)))
+            self.assertEqual(used, {p["identifier"] for p in helpers.products()["packages"]})
 
 
 if __name__ == "__main__":

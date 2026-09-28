@@ -18,7 +18,7 @@ Commands (run `python3 lab.py <cmd> -h` for details):
                              + local variations.
   pull [--paywall KEY]       Snapshot live config into my/snapshots/.
   new NAME [--source ...]    Start a variation from published/draft/another
-                             variation/a library design.
+                             variation.
   render NAME                Emit simulator resources for a variation.
   preview NAME [--platform]  Render + screenshot on iOS simulator and/or
                              Android emulator in BOTH eligibility states.
@@ -52,7 +52,6 @@ ENV_PATH = os.path.join(MY, ".env")
 VAR_DIR = os.path.join(MY, "variations")
 SNAP_DIR = os.path.join(MY, "snapshots")
 RES_DIR = os.path.join(MY, ".resources")
-LIBRARY_DESIGNS = os.path.join(ROOT, "library", "designs")
 LOCAL_ASSET_BASE = "https://assets.pawwalls.com/lab/"   # rewritten by the harnesses
 IMAGE_URL_FIELDS = ("original", "heic", "heic_low_res", "webp", "webp_low_res")
 
@@ -179,13 +178,6 @@ def list_variations():
         return []
     return sorted(d for d in os.listdir(VAR_DIR)
                   if os.path.isfile(os.path.join(VAR_DIR, d, "paywall.json")))
-
-
-def list_designs():
-    if not os.path.isdir(LIBRARY_DESIGNS):
-        return []
-    return sorted(d for d in os.listdir(LIBRARY_DESIGNS)
-                  if os.path.isfile(os.path.join(LIBRARY_DESIGNS, d, "generate.py")))
 
 
 def walk(node, fn):
@@ -319,7 +311,6 @@ def cmd_status(args):
                     first = " — " + ln.strip()[:80]
                     break
         print(f"  {v}{first}")
-    print("\nlibrary designs: " + (", ".join(list_designs()) or "(none)"))
 
 
 def cmd_pull(args):
@@ -366,13 +357,6 @@ def cmd_new(args):
         payload = working_copy(comps.get(src) or comps["published"])
         os.makedirs(os.path.join(dest, "screenshots"))
         save_json(os.path.join(dest, "paywall.json"), payload)
-    elif src in list_designs():
-        shutil.copytree(os.path.join(LIBRARY_DESIGNS, src), dest,
-                        ignore=shutil.ignore_patterns("screenshots", "README.md", "__pycache__"))
-        os.makedirs(os.path.join(dest, "screenshots"), exist_ok=True)
-        print(f"copied library design '{src}' → edit generate.py, then: python3 {os.path.relpath(dest, ROOT)}/generate.py")
-        # Generate once so paywall.json exists against this user's products.
-        run_generate(dest)
     else:
         payload = load_variation(src)
         os.makedirs(os.path.join(dest, "screenshots"))
@@ -747,7 +731,7 @@ def main():
     sub.add_parser("status")
     sp = sub.add_parser("pull"); sp.add_argument("--paywall")
     sp = sub.add_parser("new"); sp.add_argument("name")
-    sp.add_argument("--source", default="published", help="published | draft | <variation> | <library design>")
+    sp.add_argument("--source", default="published", help="published | draft | <variation>")
     sp.add_argument("--paywall")
     sp = sub.add_parser("render"); sp.add_argument("name")
     sp = sub.add_parser("preview"); sp.add_argument("name")

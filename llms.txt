@@ -1,5 +1,5 @@
 # rc-paywall-lab-for-agents
-> Author, preview (iOS simulator + Android emulator, offline, both intro-offer eligibility states), lint, diff, push and publish RevenueCat Paywalls v2 (components JSON) via the REST API v2 — designed to be operated by a coding agent. Includes a library of parameterized paywall designs and recipes.
+> Author, preview (iOS simulator + Android emulator, offline, both intro-offer eligibility states), lint, diff, push and publish RevenueCat Paywalls v2 (components JSON) via the REST API v2 — designed to be operated by a coding agent.
 
 - Start here for agents: AGENTS.md
 - Human overview + 60-second start: README.md
@@ -8,5 +8,4 @@
 - Why the dashboard builder isn't enough: docs/revenuecat-builder-gaps.md
 - Platforms/toolchains/SDK pins: docs/platforms.md
 - Workflow & publish policy: docs/workflow.md
-- Library index: library/INDEX.md (machine-readable: library/catalog.json)
 - Contribute by prompt, not PR: CONTRIBUTING.md

@@ -50,7 +50,7 @@ produce the same screenshots. Neither patches the SDK; each pins the SDK version
 
 ## SDK compatibility matrix
 
-Verified = a real design rendered in both eligibility states on this harness.
+Verified = a real paywall rendered in both eligibility states on this harness.
 
 | harness | SDK version | verified | notes |
 |---|---|---|---|

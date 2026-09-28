@@ -26,8 +26,8 @@ All keys snake_case. Unknown keys are ignored by the SDKs — don't rely on it.
 - `header`: optional stack above the content (usually `null`).
 - `stack`: the root content stack (scrollable if taller than the screen).
 - `sticky_footer`: `null` or `{"type": "footer", "id", "name", "stack"}` ⚠️ the type
-  name is `footer`, not `sticky_footer` (API 422). Prefer no footer — see the
-  responsive-column recipe: the dashboard preview and the SDK lay footers out differently.
+  name is `footer`, not `sticky_footer` (API 422). Prefer no footer — see *Layout parity* below: the dashboard preview and the SDK lay
+  footers out differently.
 
 ## Components (every component has `type`, `id`, `name`)
 
@@ -88,6 +88,49 @@ make old SDKs skip the override → **author the base state as the safe fallback
 Eligibility ground truth: iOS asks StoreKit per subscription group per Apple ID
 (`unknown` renders as eligible); Android derives it from the product's offer phases
 (a free-trial phase present = eligible). `lab.py preview` forces both states.
+
+### Eligibility siblings (builder-legible show/hide)
+
+The dashboard builder's rules UI only sees visibility rules on **top-level** layers,
+not on anything nested inside a `tabs` component — where toggle-style paywalls keep
+their trial copy. Rules there work in the app but are invisible in the builder
+(`lint`: `nested-visibility-rule`). Instead, use two top-level siblings:
+
+```
+├── Headline (trial)     base hidden,  SHOWN when intro offer available
+├── Headline (no trial)  base visible, HIDDEN when intro offer available
+├── Switch (tabs)        base hidden,  SHOWN when intro offer available
+└── Offers (no trial)    base visible, HIDDEN when intro offer available
+```
+
+Use the extended `intro_offer_condition` form (it's what the builder's rule scanner
+recognizes); share text lids between siblings where copy is identical. DSL:
+`eligibility_siblings(trial_node, no_trial_node)`. Text overrides in the legacy
+`intro_offer` form are the one nested rule the builder does list.
+
+## Layout parity
+
+- **The dashboard preview and the SDK disagree about sticky footers** (the preview
+  overlays the footer on full-height content; the SDK stacks it below). One
+  full-height column with `spacer()`s renders the same everywhere:
+  `stack([spacer(), headline, spacer(), offers, links], h="fill", margin=edges(top=44, …))`.
+- **`distribution: space_evenly` counts hidden children** — the SDK adds a gap per
+  child even when `visible: false`, so the two eligibility states space differently.
+  Explicit spacers don't.
+- **Content ignores the top safe area**: use a fixed top margin (44pt clears the
+  Dynamic Island) and a bottom margin for the home indicator.
+- **A badge is part of its card**: a badge that shows in only one toggle state belongs
+  on that tab's copy of the card, not in an override.
+- Composited effects (fanned photos, baked shadows, mesh gradients) aren't component
+  features — pre-render them into one asset.
+
+## Assets
+
+Reference images as `https://assets.pawwalls.com/lab/<file>` with the file in
+`<variation>/assets/`; both harnesses map that host to the local files. Before push,
+`lab.py upload-assets` sends them to RevenueCat's media library and `push`/`create`
+substitute the hosted URLs (refusing if any are unmapped). Declared `width`/`height`
+are pixel sizes; export @2x/@3x.
 
 ## UI config (fonts, named colors)
 

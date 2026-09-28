@@ -40,8 +40,8 @@ Gradle + dependencies (~5 min). Both look hung. Don't kill them.
 ## The loop
 
 ```bash
-python3 lab.py new <name> --source published        # or draft | <variation> | <library design>
-# edit my/variations/<name>/paywall.json  — or better, generate.py (see library/)
+python3 lab.py new <name> --source published        # or draft | <variation>
+# edit my/variations/<name>/paywall.json  — or better, write generate.py (paywall_dsl.py)
 python3 lab.py preview <name> [--generate] [--platform ios|android]
 python3 lab.py lint <name>
 python3 lab.py diff <name>                          # vs live published (or --against draft)
@@ -54,18 +54,19 @@ Screenshots land in `my/variations/<name>/screenshots/{ios,android}-{eligible,tr
 Show them to the human (upload/attach — don't describe them). Iterate on feedback in
 the same variation; keep `NOTES.md` current (it is the approval record).
 
-Prefer **generating** over hand-editing JSON: copy a library design
-(`--source gradient-trial-toggle`), edit copy/palette/structure in `generate.py`, run
-`preview --generate`. Raw JSON from `--source published` is fine for small edits.
+Prefer **generating** over hand-editing JSON for anything beyond small edits: write a
+`generate.py` in the variation with `paywall_dsl.py` (iterate `products()` so it works
+for any package set), then `preview --generate`. Raw JSON from `--source published`
+is fine for small edits.
 
 ## When something looks impossible
 
 - Component/JSON questions → `docs/PAYWALL_JSON.md` (field guide, vocab, overrides).
 - "The builder doesn't show my rule" → `docs/revenuecat-builder-gaps.md` + the
-  eligibility-siblings recipe. It's the builder, not you.
+  eligibility-siblings section of `docs/PAYWALL_JSON.md`. It's the builder, not you.
 - API 422 → run `lint`; the rule is probably there. If not, fix it, add a lint rule,
   and `lab.py suggest` it.
-- Layout differs between dashboard preview and SDK → `library/recipes/responsive-column.md`.
+- Layout differs between dashboard preview and SDK → the layout section of `docs/PAYWALL_JSON.md`.
 - Harness build fails after an SDK bump → `docs/platforms.md` (compat matrix + known breaks).
 - Emulator "offline" forever → we cold-boot (`-no-snapshot-load`) already; if a human
   started one with a stale snapshot, ask them to close it.
@@ -86,7 +87,7 @@ Prefer **generating** over hand-editing JSON: copy a library design
 
 You will hit things this lab doesn't handle. Fix them locally in your fork, then
 `python3 lab.py suggest --intent "…" --changes "…" --why "…" --open` — a prompt, not
-a PR. Upstream generalizes it. Good candidates: a new lint rule, a recipe, a design,
+a PR. Upstream generalizes it. Good candidates: a new lint rule, a DSL builder,
 an SDK-version fix, a `doctor` check that would have saved you time.
-After touching `lab.py`, `paywall_dsl.py`, `lab_lint.py` or a library design, run
+After touching `lab.py`, `paywall_dsl.py`, or `lab_lint.py`, run
 `python3 -m unittest` (seconds, no simulator) — then the four screenshots.

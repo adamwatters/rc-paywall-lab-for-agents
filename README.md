@@ -8,9 +8,9 @@ Code, Codex, Cursor, …) write that JSON from Python, render it with the *exact
 `purchases-ios` / `purchases-android` versions your app ships — in both
 intro-offer eligibility states, with your real prices mocked — diff it against
 production, push it as a draft through the RevenueCat REST API v2, and publish only
-when a human says so. It also ships a library of complete paywall designs and the
-non-obvious recipes (eligibility rules the builder can't express, layout parity
-gotchas, the API's undocumented validation rules) so agents don't rediscover them.
+when a human says so. The non-obvious rules (eligibility rules the builder can't
+express, layout parity gotchas, the API's undocumented validation rules) are encoded
+in lint and the field guide so agents don't rediscover them.
 
 ```
 idea ──▶ generate.py ──▶ paywall.json ──▶ lab.py preview ──▶ 4 screenshots ──▶ human review
@@ -30,7 +30,7 @@ python3 lab.py init --project proj...    # writes my/config.json + my/products.j
 $EDITOR my/products.json                 # prices / periods / trials (the API doesn't know store prices)
 python3 lab.py detect-sdk ../your-app --apply   # pin both harnesses to the SDK versions your app ships
 python3 lab.py doctor                    # toolchain check with exact fix commands
-python3 lab.py new first --source minimal-two-tier
+python3 lab.py new first --source published
 python3 lab.py preview first             # first run builds the harnesses (iOS ~10 min, Android ~5 min), then ~1 min
 ```
 
@@ -46,11 +46,10 @@ Requirements: Python 3.9+ (no packages), Xcode + an iOS simulator for iOS, a JDK
 | | |
 |---|---|
 | `lab.py` | the CLI: `doctor`, `detect-sdk`, `init`, `status`, `pull`, `new`, `render`, `preview`, `diff`, `lint`, `upload-assets`, `push`, `create`, `publish`, `suggest` |
-| `paywall_dsl.py` | build paywall JSON from Python; recipes are functions (`eligibility_siblings`, `trial_toggle`, `badge_overlay`, `footer_links`, …) |
+| `paywall_dsl.py` | build paywall JSON from Python; includes higher-level builders (`eligibility_siblings`, `trial_toggle`, `badge_overlay`, `footer_links`, …) |
 | `lab_lint.py` | every API/SDK rule that has rejected or mis-rendered a paywall on us, as checks |
 | `harness/ios` | Xcode app + SwiftPM dependency on `purchases-ios` (version = one line); renders offline with injected eligibility |
 | `harness/android` | Gradle app + Maven `purchases-ui` (version = one line); public opt-in APIs only |
-| `library/` | designs (complete, parameterized, screenshotted) + recipes (the hard-won building blocks) |
 | `docs/` | the components JSON field guide, the dashboard-builder gaps report, platform notes, workflow & policy |
 | `tests/` | `python3 -m unittest` — DSL→lint contract, every lint rule, `render` output, `init`/`detect-sdk` from fixtures; no simulator needed (runs in CI) |
 | `my/` | **your** project: config, products, variations, snapshots (a fork keeps these; upstream never touches them) |
@@ -69,7 +68,7 @@ Requirements: Python 3.9+ (no packages), Xcode + an iOS simulator for iOS, a JDK
 ## Contributing: send prompts, not PRs
 
 Fork it, keep your `my/` in your fork, `git pull upstream main` for tool updates.
-When you build something others would want — a design, a recipe, a lint rule, a
+When you build something others would want — a lint rule, a DSL builder, a
 platform fix — run `python3 lab.py suggest --open` (or open an issue) describing the
 **intent**. Upstream turns it into a generalized change. See [CONTRIBUTING.md](CONTRIBUTING.md).
 

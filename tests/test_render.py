@@ -1,4 +1,4 @@
-"""`render` produces what the harnesses consume; lab home resolution; `new` from a design."""
+"""`render` produces what the harnesses consume; lab home resolution; `new` from a variation."""
 import argparse
 import contextlib
 import io
@@ -116,20 +116,21 @@ class RenderTests(unittest.TestCase):
             lab.run_generate(d)
         self.assertTrue(os.path.isfile(os.path.join(d, "paywall.json")))
 
-    def test_new_from_library_design_generates_a_lintable_variation(self):
-        args = argparse.Namespace(name="first", source="minimal-two-tier", paywall=None)
+    def test_new_from_variation_copies_json_and_assets(self):
+        helpers.generate_fixture(self.home, "base")
+        args = argparse.Namespace(name="first", source="base", paywall=None)
         with contextlib.redirect_stdout(io.StringIO()):
             self.lab.cmd_new(args)
         d = os.path.join(self.home, "variations", "first")
-        for f in ("paywall.json", "generate.py", "NOTES.md"):
+        for f in ("paywall.json", "NOTES.md", os.path.join("assets", "bg.png")):
             self.assertTrue(os.path.isfile(os.path.join(d, f)), f)
         self.assertTrue(os.path.isdir(os.path.join(d, "screenshots")))
-        self.assertFalse(os.path.exists(os.path.join(d, "README.md")))   # library-only files stay behind
+        self.assertEqual(self.lab.load_variation("first"), self.lab.load_variation("base"))
         var = self.lab.load_variation("first")
         findings = lab_lint.lint(var, self.lab.merged_ui_config("first"), self.lab.products(),
                                  assets_dir=os.path.join(d, "assets"))
         self.assertEqual([], [f.rule for f in findings])
-        self.assertEqual(self.lab.list_variations(), ["first"])
+        self.assertEqual(self.lab.list_variations(), ["base", "first"])
         with self.assertRaises(SystemExit):   # refuses to overwrite
             with contextlib.redirect_stderr(io.StringIO()):
                 self.lab.cmd_new(args)

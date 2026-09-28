@@ -130,7 +130,7 @@ class LintRules(unittest.TestCase):
         root["components"][0]["text_lid"] = S.add("title", "Start your free trial")
         var["components_localizations"] = S.localizations()
         self.assertIn("trial-copy-unconditional", rules(var))
-        # any intro-offer rule anywhere silences it (the recipe way)
+        # any intro-offer rule anywhere silences it (the eligibility-siblings way)
         plain = dsl.text(S.add("title_plain", "Unlock everything"))
         dsl.eligibility_siblings(root["components"][0], plain)
         root["components"].insert(1, plain)

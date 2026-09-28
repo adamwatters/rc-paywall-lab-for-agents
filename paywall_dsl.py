@@ -10,8 +10,8 @@ SDKs decode (purchases-ios 5.7x / purchases-android 10.x) and the API accepts.
     title = text(S.add("title", "Unlock everything"), fsize=28, weight="bold")
     write(paywall(stack([title, spacer(), ...], h="fill")), S)
 
-Recipes (library/recipes/*.md) are functions in this module: eligibility_siblings,
-trial_toggle, badge_overlay, footer_links, spacer, image with local assets, …
+Higher-level builders: eligibility_siblings, trial_toggle, badge_overlay,
+footer_links, spacer, image with local assets, … (the why: docs/PAYWALL_JSON.md).
 """
 import base64
 import hashlib
@@ -199,7 +199,7 @@ def when_selected(**props):
 
 
 def eligibility_siblings(trial_node, no_trial_node):
-    """The builder-legible eligibility pattern (library/recipes/eligibility-siblings.md):
+    """The builder-legible eligibility pattern (docs/PAYWALL_JSON.md):
     two TOP-LEVEL siblings — `trial_node` base-hidden and shown when an intro offer is
     available, `no_trial_node` base-visible and hidden when it is. Base state = the
     trial-INELIGIBLE layout, which is also the safe fallback for old SDKs."""
@@ -277,7 +277,7 @@ def lab_home():
 
 
 def products():
-    """Packages from my/products.json (or the example file) — designs iterate these."""
+    """Packages from my/products.json (or the example file) — generators iterate these."""
     for p in (os.path.join(lab_home(), "products.json"), os.path.join(lab_home(), "products.example.json")):
         if os.path.isfile(p):
             return json.load(open(p))["packages"]
@@ -320,7 +320,7 @@ def write(out, path=None):
 # ------------------------------------------------------------------ placeholder assets (stdlib PNG)
 def write_png(path, w, h, pixel):
     """Write an RGBA PNG with pixel(x, y) -> (r, g, b, a). Stdlib only — for
-    generated placeholder art (gradients, blobs) so designs ship without binaries."""
+    generated placeholder art (gradients, blobs) without shipping binaries."""
     raw = bytearray()
     for y in range(h):
         raw.append(0)

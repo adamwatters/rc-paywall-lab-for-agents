@@ -15,4 +15,4 @@ labels: prompt
 <!-- Why another RevenueCat team would hit the same thing. -->
 
 ## Evidence
-<!-- Screenshots (both platforms/states for designs), API error text, SDK versions. -->
+<!-- Screenshots (both platforms/states for visual changes), API error text, SDK versions. -->

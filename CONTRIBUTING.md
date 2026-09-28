@@ -19,16 +19,12 @@ python3 lab.py suggest \
 
 Good prompts:
 - a lint rule (with the rejection text it prevents)
-- a recipe (a reusable element + the lesson behind it) or a full design, with
-  screenshots for both platforms and both eligibility states — **placeholder copy
-  and art only**, no brand assets, no product ids
+- a DSL builder (a reusable element + the lesson behind it), with screenshots for
+  both platforms and both eligibility states — no brand assets, no product ids
 - a `doctor` check or platform fix (with the SDK/OS versions involved)
 - a doc correction with the source
 
-Designs recreated from public paywalls are welcome as inspiration with an
-"inspired by" attribution; never logos, photography, or verbatim copy.
-
 Upstream verifies every change with `python3 -m unittest` (CI) and the four
-screenshots of the two library designs on both platforms (manual).
+screenshots (both platforms × both eligibility states, manual).
 
 License: MIT. By submitting a prompt you agree the resulting change is MIT.
