@@ -30,7 +30,7 @@ python3 lab.py init --project proj...    # writes my/config.json + my/products.j
 $EDITOR my/products.json                 # prices / periods / trials (the API doesn't know store prices)
 python3 lab.py detect-sdk ../your-app --apply   # pin both harnesses to the SDK versions your app ships
 python3 lab.py doctor                    # toolchain check with exact fix commands
-python3 lab.py new first --source published
+python3 lab.py new first --source published   # or --source blank for an empty generate.py
 python3 lab.py preview first             # first run builds the harnesses (iOS ~10 min, Android ~5 min), then ~1 min
 ```
 

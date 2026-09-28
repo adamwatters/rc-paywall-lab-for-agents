@@ -40,7 +40,7 @@ Gradle + dependencies (~5 min). Both look hung. Don't kill them.
 ## The loop
 
 ```bash
-python3 lab.py new <name> --source published        # or draft | <variation>
+python3 lab.py new <name> --source published        # or draft | blank | <variation>
 # edit my/variations/<name>/paywall.json  — or better, write generate.py (paywall_dsl.py)
 python3 lab.py preview <name> [--generate] [--platform ios|android]
 python3 lab.py lint <name>
@@ -54,8 +54,8 @@ Screenshots land in `my/variations/<name>/screenshots/{ios,android}-{eligible,tr
 Show them to the human (upload/attach — don't describe them). Iterate on feedback in
 the same variation; keep `NOTES.md` current (it is the approval record).
 
-Prefer **generating** over hand-editing JSON for anything beyond small edits: write a
-`generate.py` in the variation with `paywall_dsl.py` (iterate `products()` so it works
+Prefer **generating** over hand-editing JSON for anything beyond small edits: start from
+`--source blank` (a minimal `generate.py`: title, a card per package, CTA, footer links) or write one with `paywall_dsl.py` (iterate `products()` so it works
 for any package set), then `preview --generate`. Raw JSON from `--source published`
 is fine for small edits.
 

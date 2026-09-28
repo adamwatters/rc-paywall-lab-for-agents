@@ -135,6 +135,19 @@ class RenderTests(unittest.TestCase):
             with contextlib.redirect_stderr(io.StringIO()):
                 self.lab.cmd_new(args)
 
+    def test_new_blank_writes_a_generator_that_lints_clean(self):
+        args = argparse.Namespace(name="first", source="blank", paywall=None)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.lab.cmd_new(args)
+        d = os.path.join(self.home, "variations", "first")
+        for f in ("generate.py", "paywall.json", "NOTES.md"):
+            self.assertTrue(os.path.isfile(os.path.join(d, f)), f)
+        var = self.lab.load_variation("first")
+        findings = lab_lint.lint(var, self.lab.merged_ui_config("first"), self.lab.products())
+        self.assertEqual([], [f"{f.rule}: {f.message}" for f in findings])
+        used = {c["package_id"] for c in var["components_config"]["base"]["stack"]["components"][3]["components"]}
+        self.assertEqual(used, {p["identifier"] for p in self.lab.products()["packages"]})
+
     def test_working_copy_normalizes_api_components(self):
         wc = self.lab.working_copy({"components_config": {"base": {}}, "components_localizations": {"en_US": {}},
                                     "default_locale": "en_US", "revision": 7, "extra": "ignored"})

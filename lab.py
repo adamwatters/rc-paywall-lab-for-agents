@@ -18,7 +18,7 @@ Commands (run `python3 lab.py <cmd> -h` for details):
                              + local variations.
   pull [--paywall KEY]       Snapshot live config into my/snapshots/.
   new NAME [--source ...]    Start a variation from published/draft/another
-                             variation.
+                             variation, or a blank generate.py skeleton.
   render NAME                Emit simulator resources for a variation.
   preview NAME [--platform]  Render + screenshot on iOS simulator and/or
                              Android emulator in BOTH eligibility states.
@@ -344,6 +344,46 @@ NOTES_TEMPLATE = """# {name}
 """
 
 
+BLANK_GENERATOR = """\
+#!/usr/bin/env python3
+\"\"\"{name} — generates paywall.json. Run: python3 lab.py preview {name} --generate
+DSL reference: paywall_dsl.py; JSON rules: docs/PAYWALL_JSON.md.\"\"\"
+import os
+import sys
+
+sys.path.insert(0, os.environ.get("PAYWALL_LAB_ROOT") or os.path.join(os.path.dirname(os.path.abspath(__file__)), {root!r}))
+from paywall_dsl import *  # noqa: E402,F403
+
+reset_ids()
+S = Strings()
+pkgs = products()
+
+packages = [package(p["identifier"],
+                    stack([text(S.add("name_" + p["identifier"], p["name"]), w="fit"),
+                           text(S.add("price", V_PRICE + " / " + V_PERIOD), w="fit")],
+                          axis="horizontal", distribution="space_between",
+                          padding=edges(top=14, leading=16, bottom=14, trailing=16),
+                          border={{"color": hexcol("#DDDDDDff"), "width": 1}}, shape=rounded(12),
+                          overrides=[when_selected(border={{"color": hexcol(BLACK), "width": 2}})]),
+                    selected=(i == 0))
+            for i, p in enumerate(pkgs)]
+
+cta = purchase_button(stack([text(S.add("cta", "Continue"), color=WHITE, fsize=18, weight="semibold")],
+                            padding=edges(top=16, bottom=16), background=color_background(BLACK), shape=rounded(12)))
+
+content = stack([
+    spacer(),
+    text(S.add("title", "Title"), fsize=28, weight="bold"),
+    spacer(),
+    stack(packages, spacing=10),
+    cta,
+    footer_links(S),
+], h="fill", spacing=12, margin=edges(top=44, leading=16, trailing=16, bottom=30))
+
+write(paywall(content, S))
+"""
+
+
 def cmd_new(args):
     os.makedirs(VAR_DIR, exist_ok=True)
     dest = os.path.join(VAR_DIR, args.name)
@@ -357,6 +397,11 @@ def cmd_new(args):
         payload = working_copy(comps.get(src) or comps["published"])
         os.makedirs(os.path.join(dest, "screenshots"))
         save_json(os.path.join(dest, "paywall.json"), payload)
+    elif src == "blank":
+        os.makedirs(os.path.join(dest, "screenshots"))
+        with open(os.path.join(dest, "generate.py"), "w") as f:
+            f.write(BLANK_GENERATOR.format(name=args.name, root=os.path.relpath(ROOT, dest)))
+        run_generate(dest)
     else:
         payload = load_variation(src)
         os.makedirs(os.path.join(dest, "screenshots"))
@@ -731,7 +776,7 @@ def main():
     sub.add_parser("status")
     sp = sub.add_parser("pull"); sp.add_argument("--paywall")
     sp = sub.add_parser("new"); sp.add_argument("name")
-    sp.add_argument("--source", default="published", help="published | draft | <variation>")
+    sp.add_argument("--source", default="published", help="published | draft | blank | <variation>")
     sp.add_argument("--paywall")
     sp = sub.add_parser("render"); sp.add_argument("name")
     sp = sub.add_parser("preview"); sp.add_argument("name")
